@@ -43,3 +43,6 @@ data/hf_dataset/
 **/*.ckpt
 **/__pycache__/
 .cache/
+
+data/hf_dataset/
+**/*.arrow
