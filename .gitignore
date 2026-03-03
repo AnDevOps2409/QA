@@ -34,3 +34,12 @@ ENV/
 *.njsproj
 *.sln
 *.sw?
+# HuggingFace datasets cache / artifacts
+data/hf_dataset/
+**/*.arrow
+**/*.parquet
+**/*.bin
+**/*.pt
+**/*.ckpt
+**/__pycache__/
+.cache/
