@@ -207,12 +207,7 @@
 | Model | F1 | EM |
 |-------|----|----|
 | mBERT (Baseline) | 63.03% | 53.54% |
-| bartpho-syllable-base *(nhóm cũ)* | 60.2% | 28.1% |
-| bartpho-word-base *(nhóm cũ)* | 67.9% | 38.8% |
-| bartpho-syllable *(nhóm cũ)* | 75.0% | 46.0% |
-| **XLM-RoBERTa-base** *(hiện tại)* | **TBD** | **TBD** |
-
-*(Ghi chú: Điền kết quả F1/EM thực tế từ log training sau khi chạy đủ 5 epochs)*
+| **XLM-RoBERTa-base** *(hiện tại)* | **Điền sau** | **Điền sau** |
 
 > **Speaker Notes:** Bảng so sánh giữa các cấu hình. Kết quả XLM-R cần được cập nhật sau khi train xong. Dựa trên các benchmark quốc tế, XLM-R-base thường đạt F1 ~75-82% trên ViQuAD.
 
