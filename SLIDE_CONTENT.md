@@ -1,6 +1,4 @@
 # SLIDE THUYẾT TRÌNH — Vietnamese Extractive Question Answering with XLM-RoBERTa
-*(Viết lại từ bản gốc BARTpho, cập nhật đúng code thực tế)*
-
 ---
 
 ## 01 — INTRODUCTION
