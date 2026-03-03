@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 
 def save_data(data, type):
     # save your preprocessed data
-    with open(os.path.join("data/", type + ".json"), "w") as f:
+    with open(os.path.join("data/", type + ".json"), "w", encoding="utf-8") as f:
         json.dump(data, f, indent= 4, ensure_ascii=False)
     return
 

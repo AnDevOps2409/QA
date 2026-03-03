@@ -6,11 +6,12 @@
                 {
                     "qas": [
                         {
-                            "question": "",
-                            "id": "1"
+                            "question": "Niên hiệu của Thanh Thánh Tổ là gì?\t",
+                            "id": "demo_id",
+                            "is_impossible": false
                         }
                     ],
-                    "context": ""
+                    "context": "Thanh Thánh Tổ (chữ Hán: 清聖祖; 4 tháng 5 năm 1654 – 20 tháng 12 năm 1722), Tây Tạng tôn vị Văn Thù Hoàng đế (文殊皇帝), là vị hoàng đế thứ ba của nhà Thanh[1][2] và cũng là hoàng đế nhà Thanh thứ hai trị vì toàn cõi Trung Quốc (từ năm 1661 đến năm 1722), tổng cộng 61 năm. Trong thời gian trị vì, ông dùng niên hiệu Khang Hi (康熙), nên thường được gọi là Khang Hi Đế (康熙帝).\r\n\r\nTrong lịch sử nhà Thanh, Khang Hi được đánh giá là vị hoàng đế tài ba lỗi lạc nhất, là người đã thiết lập sự thịnh trị kéo dài 134 năm của nhà Thanh sau một loạt các cuộc chiến tranh và những chính sách tích cực khiến dòng họ Ái Tân Giác La giữ vững ngôi vị hoàng đế Trung nguyên. Ông được đánh giá là một trong những vị hoàng đế vĩ đại nhất lịch sử Trung Quốc và được xưng tụng là Khang Hi Đại đế (康熙大帝). Dưới thời cai trị của ông, Đế quốc Đại Thanh đã hoàn thành thống nhất và kiểm soát toàn bộ lãnh thổ Trung Hoa, Mãn Châu, Đài Loan, nhiều phần của vùng Cận Đông nước Nga, bảo hộ Mông Cổ và Triều Tiên.\r\n\r\nNhững năm cuối đời, với việc Nhị A Ca Dận Nhưng liên tục gặp vấn đề về nhân cách, đã hai lần bị phế ngôi thái tử, Khang Hi còn phải đau đầu khi các con của ông chia bè kéo cánh hòng chiếm đoạt hoàng vị, sử gọi là Cửu tử đoạt đích (九子夺嫡) và phần thắng thuộc về Tứ A Ca Dận Chân, tức Ung Chính Đế. Việc Khang Hi băng hà tại Sướng Xuân viên và việc Dận Chân kế thừa di mệnh lên ngôi đến nay vẫn còn gây tranh cãi. Tuy nhiên, Ung Chính sau khi lên ngôi đã chứng minh mình là một hoàng đế tài giỏi và siêng năng, đã kế tục và duy trì sự cường thịnh của Đại Thanh, do vậy vấn đề chính thống của ông dần trở thành một câu chuyện bên lề được đưa ra bàn luận.\r\n\r\nKhang Hi là hoàng đế ngồi trên ngai vàng lâu nhất trong lịch sử Trung Hoa (61 năm) và là một trong những nhà cai trị tại vị lâu nhất trong lịch sử thế giới. Thời gian tại vị của ông được xem là mở đầu của Khang Càn thịnh thế (康乾盛世) kéo dài 134 năm. Cháu nội của ông, Càn Long Đế rất ngưỡng mộ ông, không dám vượt quá số năm trị vì của tổ phụ, nên đã thoái vị sau 60 năm cầm quyền để nhường ngôi cho Gia Khánh Đế."
                 }
             ]
         }

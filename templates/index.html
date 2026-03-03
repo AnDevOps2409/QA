@@ -1,16 +1,251 @@
 {% extends 'base.html' %}
 
-{% block heading %} Results {% endblock %}
+{% block extra_style %}
+<style>
+    .hero {
+        text-align: center;
+        padding: 60px 0 48px;
+    }
 
-{% block context %}
-    {% for message in messages %}
-        <div class='message'>
-            <p>Question: {{ message['question'] }}</p>
-            <p>Context: {{ message['context'] }}</p>
-            <p>Answer: {{ message['answer'] }}</p>
+    .hero-eyebrow {
+        display: inline-block;
+        background: rgba(99, 102, 241, 0.15);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        color: #a5b4fc;
+        padding: 5px 16px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 20px;
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        line-height: 1.15;
+        margin-bottom: 16px;
+        background: linear-gradient(135deg, #e2e8f0 0%, #a5b4fc 60%, #c4b5fd 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        max-width: 520px;
+        margin: 0 auto 36px;
+    }
+
+    .cta-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        color: white;
+        text-decoration: none;
+        padding: 14px 32px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+    }
+
+    .cta-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(99, 102, 241, 0.5);
+    }
+
+    .results-section {
+        margin-top: 0;
+    }
+
+    .results-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .results-title span {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        padding: 2px 10px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        color: #a5b4fc;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 28px;
+        margin-bottom: 20px;
+        transition: border-color 0.2s;
+        animation: fadeUp 0.4s ease;
+    }
+
+    .card:hover {
+        border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+    }
+
+    .card-question {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #a5b4fc;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    .card-context {
+        background: var(--surface2);
+        border-left: 3px solid var(--border);
+        border-radius: 0 10px 10px 0;
+        padding: 14px 18px;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.7;
+        margin-bottom: 20px;
+        max-height: 140px;
+        overflow-y: auto;
+        /* Scrollbar styles */
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+    }
+
+    .card-context::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .card-context::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .card-context::-webkit-scrollbar-thumb {
+        background-color: var(--border);
+        border-radius: 10px;
+    }
+
+    .answer-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        color: #6ee7b7;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .answer-badge .dot {
+        width: 8px;
+        height: 8px;
+        background: var(--success);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.4;
+        }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 24px;
+        color: var(--text-muted);
+    }
+
+    .empty-icon {
+        font-size: 3.5rem;
+        margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Hỏi bất kỳ điều gì</h1>
+    <p>Nhập đoạn văn và câu hỏi, AI sẽ trích xuất câu trả lời chính xác ngay lập tức.</p>
+    <a href="{{ url_for('create') }}" class="cta-btn">
+        <span>🎯</span> Đặt câu hỏi ngay
+    </a>
+</div>
+
+<div class="results-section">
+    {% if messages %}
+    <div class="results-title">
+        Kết quả gần đây <span>{{ messages|length }}</span>
+    </div>
+    {% for message in messages|reverse %}
+    <div class="card">
+        <div class="card-label">Câu hỏi</div>
+        <div class="card-question">{{ message['question'] }}</div>
+
+        <div class="card-label">Ngữ cảnh</div>
+        <div class="card-context">{{ message['context'] }}</div>
+
+        <div class="card-label">Câu trả lời từ AI</div>
+        <div class="answer-badge">
+            <div class="dot"></div>
+            {{ message['answer'] }}
         </div>
+    </div>
     {% endfor %}
-    <form action="{{ url_for('create') }}">
-        <input type="submit" value="Demo" />
-    </form>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">💬</div>
+        <h3>Chưa có câu hỏi nào</h3>
+        <p>Bấm "Đặt câu hỏi ngay" để bắt đầu trải nghiệm AI Question Answering</p>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

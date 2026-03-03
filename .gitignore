@@ -1,0 +1,36 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Khoá trọng số mô hình (Rất nặng, không đẩy lên Git)
+checkpoints/
+
+# File kết quả log tạm
+my_results.json
+
+# File Jupyter Notebook nháp
+*.ipynb
+.ipynb_checkpoints/
+
+# File rác/không liên quan
+3.11
+package-lock.json
+report_group3.pdf
+
+# Môi trường ảo (Virtual environments)
+venv/
+env/
+ENV/
+.env/
+.venv/
+
+# IDE và OS
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

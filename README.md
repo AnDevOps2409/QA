@@ -1,106 +1,74 @@
-# Question Answering - BARTpho
+# ViQA — 🧠 Hệ thống Hỏi đáp Tiếng Việt (Vietnamese Question Answering)
 
-## Table of contents
+Dự án Xử lý Ngôn ngữ Tự nhiên (NLP) áp dụng bài toán **Extractive Question Answering** (Hỏi đáp trích xuất), sử dụng mô hình ngôn ngữ lớn **XLM-RoBERTa** được tinh chỉnh (fine-tuned) trên bộ dữ liệu Tiếng Việt.
 
-1. [About The Project](#about-the-project)
-2. [Getting Started](#getting-started)
-3. [Outline](#outline)
-4. [Installation and Run](#installation-and-run)
-5. [Demo](#demo)
-6. [Contribution](#contribution)
-7. [Contact](#contact)
+---
 
+## 🚀 Hướng dẫn Cài đặt & Khởi chạy
 
-## About The Project
+### 1. Yêu cầu Hệ thống
+- Python 3.11+
+- Môi trường ảo (Conda/Venv)
+- Card đồ họa (NVIDIA GPU) được khuyến khích để tăng tốc huấn luyện (Training) hoặc suy luận (Inference), tuy nhiên vẫn có thể chạy trên CPU.
 
-My project is called **Question Answering**. This is a project carried out by me when I was studying at VietAI Advanced NLP Class 02. In a nutshell, the system in this project helps us *answer* a **Question** of a given **Context**.
-
-
-## Getting Started
-
-To get started, you should have prior knowledge on **Python** and **Pytorch** at first. A few resources to get you started if this is your first Python or Tensorflow project:
-
-- [Pytorch Tutorials](https://pytorch.org/tutorials/)
-- [Python for Beginners](https://www.python.org/about/gettingstarted/)
-
-
-## Outline
-
-- Data: [UIT-ViQuAD2.0](https://aihub.vn/competitions/35) dataset from VLSP2021.
-
-- Model: `question_answering_bartpho_phobert` is based on [BARTpho](https://github.com/VinAIResearch/BARTpho) and [PhoBERT](https://github.com/VinAIResearch/PhoBERT) models.
-
-According to the orginal [paper](https://arxiv.org/abs/2109.09701), it is stated that *BARTpho-syllable and BARTpho-word are the first public large-scale monolingual sequence-to-sequence models pre-trained for Vietnamese. BARTpho uses the "large" architecture and the pre-training scheme of the sequence-to-sequence denoising autoencoder BART, thus it is especially suitable for generative NLP tasks*. Especially in this downstream task, based on our experiments, we choose **BARTpho-syllable** in preference to BARTpho-word, and **PhoBERT-large** in preference to PhoBERT-base.
-
-
-## Installation and Run
-
-1. Clone the repo
-
-   ```sh
-   git clone https://github.com/phkhanhtrinh23/question_answering_bartpho_phobert.git
-   ```
-  
-2. Use any code editor to open the folder **question_answering_bartpho_phobert**.
-
-3. Run `pip install -r requirements.txt` to install the required packages. 
-
-**Note**: You can install transformer as follows:
-```
-git clone --single-branch --branch fast_tokenizers_BARTpho_PhoBERT_BERTweet https://github.com/datquocnguyen/transformers.git
-
-cd transformers
-
-pip3 install -e .
+### 2. Cài đặt Thư viện
+Mở Terminal, trỏ vào thư mục dự án và chạy lệnh sau để cài đặt các Dependency:
+```bash
+pip install -r requirements.txt
+# Nếu chưa có file requirements, hãy chạy lệnh dưới đây:
+pip install torch transformers datasets flask uvicorn numpy==1.26.4
 ```
 
-4. After you have received the permission to download and use UIT-ViQuAD2.0, the structure of the dataset should be as follows:
-```text
-├── data
-|  └── demo.json (not from UIT-ViQuAD2.0)
-|  └── test.json
-|  └── train.json
+### 3. Huấn luyện Mô hình (Training)
+Nếu bạn muốn huấn luyện lại mô hình để tăng độ chính xác, hãy chạy lệnh:
+```bash
+python train.py
 ```
+*Lưu ý: Thời gian huấn luyện phụ thuộc lớn vào sức mạnh GPU. Mặc định mã nguồn sẽ chạy 5 vòng lặp (epochs).* Mọi Checkpoint tốt nhất sẽ tự động lưu vào thư mục `checkpoints/`.
 
-5. Run `python data.py` to split the `train.json` into `new_train.json` and `valid.json` with 9:1 ratio respectively.
+### 4. Khởi chạy Web Server (Inference)
+Để chạy giao diện Web tương tác trực quan (Sử dụng Flask Backend), gõ lệnh:
+```bash
+python api.py
+```
+Truy cập vào địa chỉ: **[http://127.0.0.1:5000](http://127.0.0.1:5000)** trên trình duyệt.
 
-6. Now you can easily train the model with this command `python train.py`.
+---
 
-7. You can validate the model by `python validate.py`. This file validates the score of the trained model based on `valid.json`
+## 📑 Báo Cáo Dự Án Cuối Kỳ
 
-**Note**: Of course, you can parse any arguments given in the `ArgumentParser` in both `train.py` and `validate.py` for better results.
+### 1. Định nghĩa NLP cho dự án này
+**Xử lý Ngôn ngữ Tự nhiên (NLP - Natural Language Processing)** là lĩnh vực giao thoa giữa Khoa học Máy tính và Trí tuệ Nhân tạo, giúp máy tính hiểu, diễn dịch và xử lý ngôn ngữ con người.
+Trong dự án này, nhóm áp dụng bài toán **Machine Reading Comprehension (Đọc hiểu máy)** – cụ thể là **Extractive Question Answering (Hỏi đáp trích xuất)**. Hệ thống sẽ nhận đầu vào gồm 1 đoạn văn (Context) và 1 câu hỏi (Question), sau đó AI sẽ "đọc hiểu" và dự đoán chính xác vị trí bắt đầu (start token) và vị trí kết thúc (end token) của câu trả lời nằm ngay bên trong đoạn văn bản đó.
 
-8. You can infer and evaluate the results of `test.json` by `python inference.py`.
+### 2. Mục đích sử dụng
+- **Tự động hóa tra cứu:** Giúp người dùng hoặc khách hàng không phải đọc toàn bộ tài liệu dài (như văn bản luật, chính sách bảo hiểm, sách giáo khoa) mà nhận ngay được câu trả lời trúng đích.
+- **Tích hợp Chatbot:** Là module lõi ("não nội") để gắn vào các kịch bản Chatbot chăm sóc khách hàng, hệ thống giải đáp tự động của doanh nghiệp ở các website.
 
-**Note**: Because the model cannot load and infer the whole dataset at once, `validate.py` and `inference.py` only supports inferring in batches.
+### 3. Các bước tiến hành và ví dụ thực tiễn
+Quá trình xây dựng một hệ thống QA từ con số 0 gồm 5 bước chính:
+- **Bước 1 - Chuẩn bị Dữ liệu:** Sử dụng bộ dữ liệu Tiếng Việt (định dạng SQuAD JSON). Dữ liệu bao gồm các cặp `[context, question, answer_text, answer_start]`.
+- **Bước 2 - Tiền xử lý (Preprocessing):** Sử dụng `AutoTokenizer` thuộc hệ sinh thái Hugging Face. Do đặc thù Tiếng Việt, nhóm chọn mô hình có bộ từ vựng đa ngữ mạnh là **XLM-RoBERTa**. Cắt văn bản ra các token nhỏ (Subword) và áp dụng kỹ thuật trượt cửa sổ (`stride=128`, `max_length=384`) để xử lý các đoạn văn cực dài.
+- **Bước 3 - Fine-tuning (Huấn luyện):** Code vòng lặp huấn luyện bằng nền tảng PyTorch. Nhóm cấu hình thuật toán tối ưu `AdamW` với learning rate `2e-5`, và áp dụng phương pháp **Gradient Accumulation** (Tích lũy dốc) để giả lập môi trường huấn luyện RAM lớn trên máy tính cá nhân.
+- **Bước 4 - Đánh giá (Evaluation):** Tính chuẩn đánh giá **F1 Score** (Độ giao thoa tập hợp từ) và **Exact Match** (Trùng khớp 100%).
+- **Bước 5 - Triển khai (Deployment):** Gói model vào Flask Backend `api.py`. Xây dựng REST API cục bộ và giao diện Frontend với HTML/CSS/JavaScript thân thiện để người dùng tương tác trực tiếp qua trình duyệt.
 
-9. **SHOW TIME!** Now you can run your own demo website by using [Flask](https://flask.palletsprojects.com/en/2.2.x/) `python api.py`. The UI of the website is originated from `templates` folder. If possible, run this and share your results with me!
+### 4. Vấn đề và Cách khắc phục phát sinh
+Trong quá trình code và tuning, nhóm gặp phải và giải quyết một số vấn đề thực tế:
+- **Giới hạn VRAM:** Việc hạ `max_length = 384` kết hợp **Automatic Mixed Precision (AMP - Torch Autocast)** giúp tận dụng Tensor Cores trên card NVIDIA RTX 2060, giúp tăng tốc tiến trình Train lên đến 40% và tránh lỗi OOM (Out Of Memory).
+- **Lỗi Encoding tiếng Việt:** Môi trường Windows mặc định định dạng chuỗi là hệ chuẩn Mỹ (`cp1252`), gây ra `UnicodeEncodeError` khi lưu JSON chứa dấu câu Việt. Xử lý triệt để bằng tham số `encoding="utf-8"`.
+- **Xung đột Library:** PyTorch và Intel MKL xung đột OpenMP trên hệ điều hành cục bộ. Bypass bằng biến môi trường `os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"`.
 
+### 5. Ví dụ minh họa thực tiễn
+- **Input Context:** Thanh Thánh Tổ (Khang Hi) là vị hoàng đế... [dài 500 chữ]... trị vì tổng cộng 61 năm...
+- **Input Question:** Khang Hi trị vì bao nhiêu năm?
+- **Tiến trình NLP:** Flow đi từ: Text $\rightarrow$ Subword Tokenizer $\rightarrow$ chạy qua 12 lớp Transformer của XLM-RoBERTa $\rightarrow$ Hàm Softmax trả về Logit xác suất cực đại tại chuỗi con `["6", "1", " năm"]`.
+- **Output (Web UI hiển thị):** Máy tính trả về Badge nổi bật **"61 năm"**.
 
-## Demo
-Some results:
-
-<img src="./images/result_6.png"/>
-<p style="text-align:center"> Image 1 (from BARTPho-syllable)</p>
-
-<img src="./images/result_7.png"/>
-<p style="text-align:center"> Image 2 (from PhoBERT-large)</p>
-
-<img src="./images/result_8.png"/>
-<p style="text-align:center"> Image 3 (from PhoBERT-large)</p>
-
-
-## Contribution
-
-Contributions are what make GitHub such an amazing place to be learn, inspire, and create. Any contributions you make are greatly appreciated.
-
-1. Fork the project
-2. Create your Contribute branch: `git checkout -b contribute/Contribute`
-3. Commit your changes: `git commit -m 'add your messages'`
-4. Push to the branch: `git push origin contribute/Contribute`
-5. Open a pull request
-
-
-## Contact
-
-Email: phkhanhtrinh23@gmail.com
+### 6. Case study: Tình huống ứng dụng thực tế
+**Bài toán:** Bệnh viện X nhận được quá nhiều cuộc gọi từ bệnh nhân hỏi về các quy trình khám BHYT, bảng giá dịch vụ vốn đã nằm rải rác trong file PDF trên website.
+**Giải pháp áp dụng Model QA:** 
+- Toàn bộ nội dung website và sổ tay bệnh viện được nạp vào cơ sở dữ liệu làm **Context**.
+- Bệnh nhân chat qua Fanpage/Zalo OA: *"Thẻ BHYT trái tuyến được hưởng bao nhiêu % điều trị nội trú?"*
+- Model NLP QA của dự án sẽ tìm kiếm đoạn tài liệu liên quan, **trích xuất trực tiếp ngắn gọn** đáp án *"40% chi phí"* trả cho người bệnh ngay lập tức, thay vì bắt bệnh nhân tự tải file cẩm nang 50 trang về đọc. 
+$\Rightarrow$ Tiết kiệm thời gian tổng đài viên, tăng cực lớn độ hài lòng của khách hàng (UX).

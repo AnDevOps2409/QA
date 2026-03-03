@@ -1,7 +1,9 @@
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 import argparse
 from utils.metric import *
 from datasets import load_dataset
-from transformers.models.bartpho.tokenization_bartpho_fast import BartphoTokenizerFast
+from transformers import AutoTokenizer
 from transformers import AutoModelForQuestionAnswering, default_data_collator, get_scheduler
 from torch import nn
 import evaluate
@@ -131,14 +133,19 @@ def main(raw_datasets, args):
         shuffle=True,
         collate_fn=default_data_collator,
         batch_size=args.batch_size,
+        num_workers=4,
+        pin_memory=True
     )
     eval_dataloader = DataLoader(
         validation_set,
         collate_fn=default_data_collator,
-        batch_size=args.batch_size
+        batch_size=args.batch_size,
+        num_workers=4,
+        pin_memory=True
     )
 
-    device = torch.device(args.device)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
     model = AutoModelForQuestionAnswering.from_pretrained(args.pretrained_model)
     
     # Utilize 2 or more GPUs for training
@@ -148,6 +155,9 @@ def main(raw_datasets, args):
     model.to(device)
 
     optimizer = AdamW(model.parameters(), lr=args.lr)
+    
+    # Initialize Mixed Precision Scaler
+    scaler = torch.cuda.amp.GradScaler(enabled=device.type == 'cuda')
 
     num_update_steps_per_epoch = len(train_dataloader)
     num_training_steps = args.epochs * num_update_steps_per_epoch
@@ -159,23 +169,38 @@ def main(raw_datasets, args):
         num_training_steps=num_training_steps,
     )
 
-    progress_bar = tqdm(range(num_training_steps))
+    # Thêm tham số Gradient Accumulation Steps
+    accumulation_steps = 4
+
+    progress_bar = tqdm(range(num_training_steps // accumulation_steps))
 
     prev_metrics = None
     for epoch in range(args.epochs):
         # Training
         model.train()
-        for _, batch in enumerate(train_dataloader): # Evaluate after each epoch, not after a number of steps!
-            outputs = model(**batch)
-            loss = outputs.loss
+        for i, batch in enumerate(train_dataloader): # Evaluate after each epoch, not after a number of steps!
+            batch = {k: v.to(device) for k, v in batch.items()}
+            
+            # Forward pass with AMP
+            with torch.autocast(device_type=device.type if device.type == 'cuda' else 'cpu', enabled=device.type == 'cuda'):
+                outputs = model(**batch)
+                loss = outputs.loss
 
             # backpropagation in 2 GPUs so we need to calculate mean of loss
-            loss.mean().backward()
+            loss = loss.mean()
+            loss = loss / accumulation_steps # Chuẩn hoá loss
+            
+            # Scale gradients and backward
+            scaler.scale(loss).backward()
 
-            optimizer.step()
-            lr_scheduler.step()
-            optimizer.zero_grad()
-            progress_bar.update(1)
+            # Gradient Accumulation: Chỉ update weights sau 'accumulation_steps' bước
+            if ((i + 1) % accumulation_steps == 0) or (i + 1 == len(train_dataloader)):
+                scaler.step(optimizer)
+                scaler.update()
+                
+                lr_scheduler.step() # PyTorch 1.1.0+ require LR step after optimizer
+                optimizer.zero_grad()
+                progress_bar.update(1)
 
         # Evaluation
         model.eval()
@@ -183,6 +208,7 @@ def main(raw_datasets, args):
         end_logits = []
         print("Evaluation!")
         for batch in tqdm(eval_dataloader):
+            batch = {k: v.to(device) for k, v in batch.items()}
             with torch.no_grad():
                 outputs = model(**batch)
 
@@ -199,12 +225,19 @@ def main(raw_datasets, args):
         )
         print(f"Epoch {epoch}:", metrics)
 
-        if epoch == 0:
-            prev_metrics = metrics
-        elif metrics['f1'] > prev_metrics['f1']:
-            print(f"Saving model to {args.output_dir}...")
-            model.module.save_pretrained(args.output_dir)
-            print("Finished.")
+        # Save Model and Tokenizer logic
+        if epoch == 0 or (prev_metrics is not None and metrics['f1'] > prev_metrics['f1']):
+            print(f"Saving model and tokenizer to {args.output_dir}...")
+            # Save weights
+            if hasattr(model, "module"):
+                model.module.save_pretrained(args.output_dir)
+            else:
+                model.save_pretrained(args.output_dir)
+                
+            # Save tokenizer vocab
+            tokenizer.save_pretrained(args.output_dir)
+            
+            print("Checkpoint saved successfully.")
             prev_metrics = metrics
 
 
@@ -215,13 +248,13 @@ if __name__ == "__main__":
     parser.add_argument('-device', type=str, default="cuda")
     parser.add_argument('-output_dir', type=str, default="checkpoints")
     parser.add_argument('-scheduler', type=str, default="linear")
-    parser.add_argument('-pretrained_model', type=str, default="vinai/bartpho-syllable")
+    parser.add_argument('-pretrained_model', type=str, default="xlm-roberta-base")
 
-    parser.add_argument('-batch_size', type=int, default=2)
-    parser.add_argument('-epochs', type=int, default=15)
+    parser.add_argument('-batch_size', type=int, default=16)
+    parser.add_argument('-epochs', type=int, default=5)
     parser.add_argument('-lr', type=int, default=2e-5)
 
-    parser.add_argument('-max_length', type=int, default=1024)
+    parser.add_argument('-max_length', type=int, default=384)
     parser.add_argument('-stride', type=int, default=128)
 
     parser.add_argument('-n_best', type=int, default=20)
@@ -229,12 +262,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     
-    raw_datasets = load_dataset("utils/viquad.py")
+    from datasets import load_from_disk
+    raw_datasets = load_from_disk("data/hf_dataset")
 
     # Filter examples which have just 1 element in list of 'text' answer
     raw_datasets["validation"] = raw_datasets["validation"].filter(lambda x: len(x["answers"]["text"]) == 1)
 
-    tokenizer = BartphoTokenizerFast.from_pretrained(args.pretrained_model)
+    tokenizer = AutoTokenizer.from_pretrained(args.pretrained_model, use_fast=True)
     max_length = args.max_length
     stride = args.stride
 

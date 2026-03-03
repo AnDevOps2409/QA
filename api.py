@@ -1,6 +1,9 @@
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 from flask import Flask, render_template, request, url_for, redirect
 from datasets import load_dataset
-from transformers.models.bartpho.tokenization_bartpho_fast import BartphoTokenizerFast
+from transformers import AutoTokenizer
 from transformers import AutoModelForQuestionAnswering
 import torch
 import json
@@ -12,14 +15,8 @@ from torch import nn
 
 app = Flask(__name__)
 
-# Example
-messages = [
-        {
-            'question': 'This is the question 1.',
-            'context': 'This is the context 1.',
-            'answer': 'This is the answer 1.',
-        },
-            ]
+# Results list - only keeps the latest submission
+messages = []
 
 global_model = None
 
@@ -86,7 +83,7 @@ class ViQuADModel:
         for idx, feature in enumerate(eval_set):
             example_to_features[feature["example_id"]].append(idx)
 
-        batch = {k: eval_set_for_model[k].to(self.device) for k in eval_set_for_model.column_names}
+        batch = {k: v.to(self.device) for k, v in eval_set_for_model[:].items()}
 
         with torch.no_grad():
             outputs = self.model(**batch)
@@ -152,12 +149,25 @@ def create():
         demo_data["data"][0]["paragraphs"][0]["context"] = context
 
         # Save the most recent record at "data/demo.json" file
-        with open(os.path.join("data/demo.json"), "w") as f:
+        with open(os.path.join("data/demo.json"), "w", encoding="utf-8") as f:
             json.dump(demo_data, f, indent= 4, ensure_ascii=False)
         f.close()
 
         # Load dataset WITHOUT USING CACHE
-        raw_datasets = load_dataset("utils/viquad_demo.py", download_mode="force_redownload")
+        from datasets import Dataset
+        
+        # Load the newly created demo JSON structure into a HuggingFace dataset format manually
+        contexts = [demo_data["data"][0]["paragraphs"][0]["context"]]
+        questions = [demo_data["data"][0]["paragraphs"][0]["qas"][0]["question"]]
+        ids = ["demo_id_0"]
+        
+        raw_datasets = {}
+        raw_datasets["test"] = Dataset.from_dict({
+            'id': ids,
+            'context': contexts,
+            'question': questions
+        })
+        
         answer = global_model.forward(raw_datasets)
 
         if not question or not context:
@@ -171,14 +181,14 @@ def create():
 
 if __name__ == "__main__":
     global_model = ViQuADModel(
-        device="cuda",
+        device="cuda" if torch.cuda.is_available() else "cpu",
         checkpoints="checkpoints",
         n_best=20,
         max_answer_length=200,
     )
 
-    tokenizer = BartphoTokenizerFast.from_pretrained("vinai/bartpho-syllable")
-    max_length = 1024
+    tokenizer = AutoTokenizer.from_pretrained("xlm-roberta-base")
+    max_length = 384
     stride = 128
     
     app.run(debug=True,host="0.0.0.0")
