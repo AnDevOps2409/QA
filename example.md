@@ -1,4 +1,4 @@
-# 📘 HƯỚNG DẪN DỄ HIỂU -- VIETNAMESE EXTRACTIVE QA (XLM-RoBERTa)
+# 📘 VIETNAMESE EXTRACTIVE QA (XLM-RoBERTa)
 
 ------------------------------------------------------------------------
 
